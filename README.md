@@ -1,6 +1,6 @@
 # ReportOmatic
 
-ReportOmatic is a CLI utility for generating opinionated report for GitLab and GitHub repositories in the same Markdown format. 
+ReportOmatic is a CLI utility for generating opinionated reports for both GitLab and GitHub repositories in the same Markdown format. 
 
 ## Features
 
