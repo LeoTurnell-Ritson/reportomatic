@@ -1,0 +1,7 @@
+.venv
+venv
+*.pyc
+*.egg-info
+*.tar.gz
+*.whl
+.coverage
