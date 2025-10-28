@@ -1,0 +1,48 @@
+[project]
+name = "Reportomatic"
+version = "0.1.0"
+description = "Reportomatic automates Markdown report generation from GitLab and GitHub repositories."
+authors = [
+	{name = "Leo Turnell-Ritson", email="l.n.turnell-ritson@bham.ac.uk" },
+]
+license = "MIT"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+	"click",
+	"python-gitlab",
+	"PyGithub",
+]
+
+[project.scripts]
+	reportomatic = "reportomatic.__main__:cli"
+	rmatic = "reportomatic.__main__:cli"  # short alias
+
+[project.optional-dependencies]
+lint = [
+	"ruff"
+]
+test = [
+	"nose2[coverage_plugin]",
+	"IDDBTest @ git+https://gitlab.bham.ac.uk/res-comp-team/iddb-and-middleware/iddb-test.git@v1.0.1"
+]
+
+[tool.ruff]
+preview = true
+line-length = 88
+indent-width = 4
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+	"F",   # Pyflakes
+	"E",   # pycodestyle error
+	"W",   # pycodestyle warning
+	"A",   # flake8-builtins
+	"S",   # flake8-bandit
+	"N",   # pep8-naming
+	"B",   # flake8-bugbear
+	"C4",  # flake8-comprehensions
+	"I",   # isort
+	"G",   # flake8-logging-format
+]
