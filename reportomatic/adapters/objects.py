@@ -1,0 +1,57 @@
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import List
+
+
+@dataclass
+class User:
+    id: int
+    username: str
+    name: str
+
+    def __str__(self):
+        return self.name or self.username or str(self.id)
+
+
+@dataclass
+class Issue:
+    id: int
+    title: str
+    state: str
+    created_at: datetime
+    updated_at: datetime
+    closed_at: datetime
+    url: str
+
+    def __str__(self):
+        return f"{self.state.upper()} [{self.title}]({self.url})"
+
+
+@dataclass
+class Pull:
+    id: int
+    title: str
+    state: str
+    created_at: datetime
+    updated_at: datetime
+    merged_at: datetime
+    url: str
+    merged_by: User = None
+    reviewers: List[User] = field(default_factory=list)
+    assignees: List[User] = field(default_factory=list)
+
+    def __str__(self):
+        return f"{self.state.upper()} [{self.title}]({self.url})"
+
+    def extras(self):
+        extras = []
+        if self.assignees:
+            assignees_str = ", ".join(str(assignee) for assignee in self.assignees)
+            extras.append(f"Assigned to {assignees_str}")
+        if self.reviewers:
+            reviewers_str = ", ".join(str(reviewer) for reviewer in self.reviewers)
+            extras.append(f"Review by {reviewers_str}")
+        if self.merged_at:
+            extras.append(f"Merged by {self.merged_by} on {self.merged_at.date()}")
+
+        return extras
