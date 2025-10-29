@@ -7,6 +7,14 @@ ReportOmatic is a CLI utility for generating opinionated reports for both GitLab
 - Generate list of active issues
 - Generate list of active pull/merge requests
 
+## Installation
+
+You can install ReportOmatic using pip:
+```bash
+pip install reportomatic
+reportomatic --version
+```
+
 ## Usage
 
 To generate a report of active issues for a given repository, use the following command:
@@ -14,7 +22,7 @@ To generate a report of active issues for a given repository, use the following 
 reportomatic <repository-url> issues
 ```
 
-Similarly to generate a report of active pull/merge:
+Similarly to generate a report of active pulls/merges:
 ```bash
 reportomatic <repository-url> pulls
 ```
