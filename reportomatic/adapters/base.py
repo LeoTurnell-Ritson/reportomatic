@@ -18,7 +18,7 @@ class Adapter(ABC):
 
     @property
     def _token(self):
-        conf_path = os.path.expanduser("~/.repomatic.conf")
+        conf_path = os.path.expanduser("~/.reportomatic.conf")
         config = configparser.ConfigParser()
         if not os.path.exists(conf_path):
             raise FileNotFoundError(f"Config file not found: {conf_path}")
