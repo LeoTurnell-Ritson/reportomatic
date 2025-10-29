@@ -24,7 +24,7 @@ class Issue:
     url: str
 
     def __str__(self):
-        return f"{self.state.upper()} [{self.title}]({self.url})"
+        return f"**{self.state.upper()}** [{self.title}]({self.url})"
 
 
 @dataclass
@@ -41,17 +41,18 @@ class Pull:
     assignees: List[User] = field(default_factory=list)
 
     def __str__(self):
-        return f"{self.state.upper()} [{self.title}]({self.url})"
+        extras = " (" + ', '.join(self.extras()) + ")" if self.extras() else ''
+        return f"**{self.state.upper()}** [{self.title}{extras}]({self.url})"
 
     def extras(self):
         extras = []
         if self.assignees:
             assignees_str = ", ".join(str(assignee) for assignee in self.assignees)
-            extras.append(f"Assigned to {assignees_str}")
+            extras.append(f"assigned to {assignees_str}")
         if self.reviewers:
             reviewers_str = ", ".join(str(reviewer) for reviewer in self.reviewers)
-            extras.append(f"Review by {reviewers_str}")
+            extras.append(f"review by {reviewers_str}")
         if self.merged_at:
-            extras.append(f"Merged by {self.merged_by} on {self.merged_at.date()}")
+            extras.append(f"merged by {self.merged_by} on {self.merged_at.date()}")
 
         return extras

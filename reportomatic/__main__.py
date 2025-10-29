@@ -42,27 +42,42 @@ def cli(ctx, url, v):
 
 @cli.command()
 @click.option(
-    "-s",
+    "-d",
     "--stale-days",
     type=int,
     default=30,
     help="Number of days to consider an issue stale and ignore it, default is 30 days.",
 )
+@click.option(
+    "-s",
+    "--state",
+    type=click.Choice(["open", "closed"], case_sensitive=False),
+    default="open",
+    help="Filter issues by state: open, closed, default is open.",
+)
+@click.option(
+    "--prefix",
+    type=str,
+    default="+ ",
+    help="Prefix to use for each issue in the output, default is '+ '.",
+)
+@click.option(
+    "-t",
+    "--strike-through",
+    is_flag=True,
+    help="Use strike-through formatting for issues.",
+)
 @click.pass_context
-def issues(ctx, stale_days):
+def issues(ctx, stale_days, state, prefix, strike_through):
     updated_after = datetime.now() - timedelta(days=stale_days)
+    wraps = "~~" if strike_through else ""
+
     try:
         for issue in ctx.obj.issues(
-            state=states.IssueState.OPEN,
+            state=states.IssueState[state.upper()],
             updated_after=updated_after
         ):
-            click.echo(f"+ {issue}")
-
-        for issue in ctx.obj.issues(
-            state=states.IssueState.CLOSED,
-            updated_after=updated_after
-        ):
-            click.echo(f"+ ~~{issue}~~")
+            click.echo(f"{prefix}{wraps}{issue}{wraps}")
     except Exception as e:
         logger.error("Error fetching issues: %s", e)
         click.echo("Failed to fetch issues.")
@@ -71,7 +86,7 @@ def issues(ctx, stale_days):
 
 @cli.command()
 @click.option(
-    "-s",
+    "-d",
     "--stale-days",
     type=int,
     default=14,
@@ -80,24 +95,32 @@ def issues(ctx, stale_days):
         "stale and ignore it, default is 14 days."
     ),
 )
+@click.option(
+    "-s",
+    "--state",
+    type=click.Choice(["open", "closed", "merged"], case_sensitive=False),
+    default="open",
+    help=(
+        "Filter issues by state: open, closed, or merged, default is open."
+        " n.b. 'merged' state is not applicable to GitHub repositories, and "
+        "will be treated as 'closed' instead."
+    ),
+)
+@click.option(
+    "--prefix",
+    type=str,
+    default="+ ",
+    help="Prefix to use for each merge/pull request in the output, default is '+ '.",
+)
 @click.pass_context
-def pulls(ctx, stale_days):
+def pulls(ctx, stale_days, state, prefix):
     updated_after = datetime.now() - timedelta(days=stale_days)
     try:
-        for mr in [
-            *ctx.obj._adapter.pulls(
-                state=states.PullState.OPEN,
-                updated_after=updated_after
-            ),
-            *ctx.obj._adapter.pulls(
-                state=states.PullState.MERGED,
-                updated_after=updated_after
-            )
-        ]:
-            click.echo(f"+ {mr}")
-            for extra in mr.extras():
-                click.echo(f"    + {extra}")
-
+        for mr in ctx.obj._adapter.pulls(
+            state=states.PullState[state.upper()],
+            updated_after=updated_after
+        ):
+            click.echo(f"{prefix}{mr}")
     except Exception as e:
         logger.error("Error fetching merge requests: %s", e)
         click.echo("Failed to fetch merge requests.")
