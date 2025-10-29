@@ -14,6 +14,9 @@ dependencies = [
 	"PyGithub",
 ]
 
+[project.urls]
+Repository = "https://github.com/LeoTurnell-Ritson/reportomatic"
+
 [project.scripts]
 	reportomatic = "reportomatic.__main__:cli"
 	rmatic = "reportomatic.__main__:cli"  # short alias
@@ -24,7 +27,6 @@ lint = [
 ]
 test = [
 	"nose2[coverage_plugin]",
-	"IDDBTest @ git+https://gitlab.bham.ac.uk/res-comp-team/iddb-and-middleware/iddb-test.git@v1.0.1"
 ]
 
 [tool.ruff]
