@@ -1,6 +1,6 @@
 [project]
 name = "reportomatic"
-version = "0.2.1"
+version = "0.2.2"
 description = "Reportomatic automates Markdown report generation from GitLab and GitHub repositories."
 authors = [
 	{name = "Leo Turnell-Ritson", email="l.n.turnell-ritson@bham.ac.uk" },
