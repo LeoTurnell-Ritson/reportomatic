@@ -24,7 +24,11 @@ class Issue:
     url: str
 
     def __str__(self):
-        return f"**{self.state.upper()}** [{self.title}]({self.url})"
+        return (
+            f"**{self.state.upper()}** "
+            f"[{self.title.strip()}]"
+            f"({self.url})"
+        )
 
 
 @dataclass
@@ -42,7 +46,11 @@ class Pull:
 
     def __str__(self):
         extras = " (" + ', '.join(self.extras()) + ")" if self.extras() else ''
-        return f"**{self.state.upper()}** [{self.title}{extras}]({self.url})"
+        return (
+            f"**{self.state.upper()}** "
+            f"[{self.title.strip()}{extras}]"
+            f"({self.url.strip()})"
+        )
 
     def extras(self):
         extras = []
