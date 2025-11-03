@@ -116,7 +116,7 @@ def issues(ctx, stale_days, state, prefix, strike_through):
 def pulls(ctx, stale_days, state, prefix):
     updated_after = datetime.now() - timedelta(days=stale_days)
     try:
-        for mr in ctx.pulls(
+        for mr in ctx.obj.pulls(
             state=states.PullState[state.upper()],
             updated_after=updated_after
         ):
