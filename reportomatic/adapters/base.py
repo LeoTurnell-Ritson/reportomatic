@@ -3,7 +3,7 @@ import os
 from abc import ABC, abstractmethod
 from urllib.parse import urlparse
 
-from .states import IssueState, PullState
+from .states import IssueState, MilestoneState, PullState
 
 
 class Adapter(ABC):
@@ -53,4 +53,8 @@ class Adapter(ABC):
 
     @abstractmethod
     def pulls(self, state=PullState.OPEN, updated_after=None):
+        pass
+
+    @abstractmethod
+    def milestones(self, state=MilestoneState.OPEN, updated_after=None):
         pass

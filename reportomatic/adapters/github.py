@@ -3,8 +3,8 @@ from datetime import timezone
 from github import Github
 
 from .base import Adapter
-from .objects import Issue, Pull, User
-from .states import IssueState, PullState
+from .objects import Issue, Milestone, Pull, User
+from .states import IssueState, MilestoneState, PullState
 
 
 class GitHubAdapter(Adapter):
@@ -16,6 +16,10 @@ class GitHubAdapter(Adapter):
         PullState.OPEN: "open",
         PullState.CLOSED: "closed",
         PullState.MERGED: "closed",
+    }
+    MILESTONE_STATE_MAP = {
+        MilestoneState.OPEN: "open",
+        MilestoneState.CLOSED: "closed",
     }
 
     @property
@@ -29,15 +33,7 @@ class GitHubAdapter(Adapter):
     def issues(self, state=IssueState.OPEN, updated_after=None):
         gh_state = self.ISSUE_STATE_MAP.get(state)
         for gh_issue in self.project.get_issues(state=gh_state, since=updated_after):
-            yield Issue(
-                id=gh_issue.number,
-                title=gh_issue.title,
-                state=gh_issue.state,
-                created_at=gh_issue.created_at,
-                updated_at=gh_issue.updated_at,
-                closed_at=gh_issue.closed_at,
-                url=gh_issue.html_url,
-            )
+            yield self.issue(gh_issue)
 
     def pulls(self, state=PullState.OPEN, updated_after=None):
         gh_state = self.PULL_STATE_MAP.get(state)
@@ -63,9 +59,55 @@ class GitHubAdapter(Adapter):
                 url=gh_pr.html_url,
             )
 
+    def milestones(self, state=MilestoneState.OPEN, updated_after=None):
+        gh_state = self.MILESTONE_STATE_MAP.get(state)
+        for gh_milestone in self.project.get_milestones(
+            state=gh_state,
+            sort="due_on",
+            direction="desc"
+        ):
+            milestone_updated = (
+                gh_milestone
+                .updated_at
+                .astimezone(timezone.utc)
+                .replace(tzinfo=None)
+            )
+            if updated_after and milestone_updated < updated_after:
+                continue
+
+            yield Milestone(
+                id=gh_milestone.number,
+                title=gh_milestone.title,
+                description=gh_milestone.description or "",
+                state=gh_milestone.state,
+                created_at=gh_milestone.created_at,
+                updated_at=gh_milestone.updated_at,
+                closed_at=gh_milestone.closed_at,
+                due_on=gh_milestone.due_on,
+                issues=[
+                    self.issue(x)
+                    for x in self.project.get_issues(
+                        milestone=gh_milestone,
+                        state="all"
+                    )
+                ],
+                url=gh_milestone.html_url,
+            )
+
     def user(self, data):
         return User(
             id=data.id,
             username=data.login,
             name=data.name or "",
+        )
+
+    def issue(self, data):
+        return Issue(
+            id=data.number,
+            title=data.title,
+            state=data.state,
+            created_at=data.created_at,
+            updated_at=data.updated_at,
+            closed_at=data.closed_at,
+            url=data.html_url,
         )

@@ -16,3 +16,6 @@ class Client:
 
     def pulls(self, state=states.PullState.OPEN, updated_after=None):
         return self._adapter.pulls(state=state, updated_after=updated_after)
+
+    def milestones(self, state=states.MilestoneState.OPEN, updated_after=None):
+        return self._adapter.milestones(state=state, updated_after=updated_after)

@@ -10,3 +10,8 @@ class PullState(Enum):
     OPEN = "opened"
     CLOSED = "closed"
     MERGED = "merged"
+
+
+class MilestoneState(Enum):
+    OPEN = "opened"
+    CLOSED = "closed"

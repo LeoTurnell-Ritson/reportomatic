@@ -4,7 +4,7 @@ from gitlab import Gitlab
 
 from .base import Adapter
 from .objects import Issue, Pull, User
-from .states import IssueState, PullState
+from .states import IssueState, MilestoneState, PullState
 
 
 class GitLabAdapter(Adapter):
@@ -82,4 +82,9 @@ class GitLabAdapter(Adapter):
             id=data["id"],
             username=data.get("username", ""),
             name=data.get("name", ""),
+        )
+
+    def milestones(self, state=MilestoneState.OPEN, updated_after=None):
+        raise NotImplementedError(
+            "Milestones are not implemented for GitLab yet"
         )

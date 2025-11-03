@@ -64,3 +64,24 @@ class Pull:
             extras.append(f"merged by {self.merged_by} on {self.merged_at.date()}")
 
         return extras
+
+
+@dataclass
+class Milestone:
+    id: int
+    title: str
+    description: str
+    state: str
+    created_at: datetime
+    updated_at: datetime
+    closed_at: datetime
+    due_on: datetime
+    url: str
+    issues: List[Issue] = field(default_factory=list)
+
+    def __str__(self):
+        return (
+            f"**{self.state.upper()}** "
+            f"[{self.title.strip()} (due {self.due_on.date()})]"
+            f"({self.url})"
+        )

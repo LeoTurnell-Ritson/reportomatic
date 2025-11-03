@@ -116,7 +116,7 @@ def issues(ctx, stale_days, state, prefix, strike_through):
 def pulls(ctx, stale_days, state, prefix):
     updated_after = datetime.now() - timedelta(days=stale_days)
     try:
-        for mr in ctx.obj._adapter.pulls(
+        for mr in ctx.pulls(
             state=states.PullState[state.upper()],
             updated_after=updated_after
         ):
@@ -124,6 +124,60 @@ def pulls(ctx, stale_days, state, prefix):
     except Exception as e:
         logger.error("Error fetching merge requests: %s", e)
         click.echo("Failed to fetch merge requests.")
+        ctx.exit(1)
+
+
+@cli.command()
+@click.option(
+    "-s",
+    "--state",
+    type=click.Choice(["open", "closed"], case_sensitive=False),
+    default="open",
+    help="Filter milestones by state: open, closed, default is open.",
+)
+@click.option(
+    "-d",
+    "--stale-days",
+    type=int,
+    default=30,
+    help=(
+        "Number of days to consider a milestone "
+        "stale and ignore it, default is 30 days."
+    ),
+)
+@click.option(
+    "--prefix",
+    type=str,
+    default="+ ",
+    help="Prefix to use for each milestone in the output, default is '+ '.",
+)
+@click.option(
+    "--indent",
+    type=int,
+    default=4,
+    help="Number of spaces to indent milestone issues, default is 4.",
+)
+@click.option(
+    "-t",
+    "--strike-through",
+    is_flag=True,
+    help="Use strike-through formatting for issues.",
+)
+@click.pass_context
+def milestones(ctx, state, stale_days, prefix, indent, strike_through):
+    updated_after = datetime.now() - timedelta(days=stale_days)
+    wraps = "~~" if strike_through else ""
+    try:
+        for milestone in ctx.obj.milestones(
+            state=states.MilestoneState[state.upper()],
+            updated_after=updated_after
+        ):
+            click.echo(f"{prefix}{wraps}{milestone}{wraps}")
+            for issue in milestone.issues:
+                click.echo(f"{' ' * indent}{prefix}{wraps}{issue}{wraps}")
+    except Exception as e:
+        logger.error("Error fetching milestones: %s", e)
+        click.echo("Failed to fetch milestones.")
         ctx.exit(1)
 
 
