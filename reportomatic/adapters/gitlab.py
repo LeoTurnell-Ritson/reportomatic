@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from gitlab import Gitlab
+from gitlab import Gitlab, GitlabGetError
 
 from .base import Adapter
 from .objects import Issue, Pull, User
@@ -27,7 +27,10 @@ class GitLabAdapter(Adapter):
 
     @property
     def project(self):
-        return self._connection.projects.get(self._path)
+        try:
+            return self._connection.projects.get(self._path)
+        except GitlabGetError:
+            return self._connection.groups.get(self._path)
 
     def issues(self, state=IssueState.OPEN, updated_after=None):
         gl_state = self.ISSUE_STATE_MAP.get(state)
