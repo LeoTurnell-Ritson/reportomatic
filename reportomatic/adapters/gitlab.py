@@ -3,7 +3,7 @@ from datetime import datetime
 from gitlab import Gitlab, GitlabGetError
 
 from .base import Adapter
-from .objects import Issue, Pull, User
+from .objects import Issue, Pull, User, Milestone
 from .states import IssueState, MilestoneState, PullState
 
 
@@ -16,6 +16,10 @@ class GitLabAdapter(Adapter):
         PullState.OPEN: "opened",
         PullState.CLOSED: "closed",
         PullState.MERGED: "merged",
+    }
+    MILESTONE_STATE_MAP = {
+        MilestoneState.OPEN: "active",
+        MilestoneState.CLOSED: "closed",
     }
 
     @property
@@ -40,15 +44,7 @@ class GitLabAdapter(Adapter):
             all=True
         )
         for gl_issue in issues:
-            yield Issue(
-                id=gl_issue.iid,
-                title=gl_issue.title,
-                state=gl_issue.state,
-                created_at=gl_issue.created_at,
-                updated_at=gl_issue.updated_at,
-                closed_at=gl_issue.closed_at,
-                url=gl_issue.web_url,
-            )
+            yield self.issue(gl_issue)
 
     def pulls(self, state=PullState.OPEN, updated_after=None):
         gl_state = self.PULL_STATE_MAP.get(state)
@@ -80,6 +76,28 @@ class GitLabAdapter(Adapter):
                 ),
             )
 
+    def milestones(self, state=MilestoneState.OPEN, updated_after=None):
+        gl_state = self.MILESTONE_STATE_MAP.get(state)
+        for milestone in self.project.milestones.list(
+            state=gl_state,
+            updated_after=updated_after,
+            all=True,
+            sort="desc",
+            order_by="due_date",
+        ):
+            yield Milestone(
+                id=milestone.iid,
+                title=milestone.title,
+                description=milestone.description,
+                state=milestone.state,
+                created_at=milestone.created_at,
+                updated_at=milestone.updated_at,
+                closed_at=milestone.closed_at if hasattr(milestone, 'closed_at') else None,
+                due_on=milestone.due_date,
+                issues=[self.issue(i) for i in milestone.issues(list=True, all=True)],
+                url=milestone.web_url,
+            )
+
     def user(self, data):
         return User(
             id=data["id"],
@@ -87,7 +105,13 @@ class GitLabAdapter(Adapter):
             name=data.get("name", ""),
         )
 
-    def milestones(self, state=MilestoneState.OPEN, updated_after=None):
-        raise NotImplementedError(
-            "Milestones are not implemented for GitLab yet"
+    def issue(self, data):
+        return Issue(
+            id=data.iid,
+            title=data.title,
+            state=data.state,
+            created_at=data.created_at,
+            updated_at=data.updated_at,
+            closed_at=data.closed_at,
+            url=data.web_url,
         )
