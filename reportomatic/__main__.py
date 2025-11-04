@@ -163,8 +163,13 @@ def pulls(ctx, stale_days, state, prefix):
     is_flag=True,
     help="Use strike-through formatting for issues.",
 )
+@click.option(
+    "--no-issues",
+    is_flag=True,
+    help="Do not list issues under each milestone.",
+)
 @click.pass_context
-def milestones(ctx, state, stale_days, prefix, indent, strike_through):
+def milestones(ctx, state, stale_days, prefix, indent, strike_through, no_issues):
     updated_after = datetime.now() - timedelta(days=stale_days)
     wraps = "~~" if strike_through else ""
     try:
@@ -173,6 +178,9 @@ def milestones(ctx, state, stale_days, prefix, indent, strike_through):
             updated_after=updated_after
         ):
             click.echo(f"{prefix}{wraps}{milestone}{wraps}")
+            if no_issues:
+                continue
+
             for issue in milestone.issues:
                 click.echo(f"{' ' * indent}{prefix}{wraps}{issue}{wraps}")
     except Exception as e:
