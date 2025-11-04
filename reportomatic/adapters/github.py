@@ -3,6 +3,7 @@ from datetime import timezone
 from github import Github
 
 from .base import Adapter
+from .helpers import to_datetime
 from .objects import Issue, Milestone, Pull, User
 from .states import IssueState, MilestoneState, PullState
 
@@ -50,9 +51,9 @@ class GitHubAdapter(Adapter):
                 id=gh_pr.number,
                 title=gh_pr.title,
                 state=gh_pr.state,
-                created_at=gh_pr.created_at,
-                updated_at=gh_pr.updated_at,
-                merged_at=gh_pr.merged_at,
+                created_at=to_datetime(gh_pr.created_at),
+                updated_at=to_datetime(gh_pr.updated_at),
+                merged_at=to_datetime(gh_pr.merged_at),
                 merged_by=self.user(gh_pr.merged_by) if gh_pr.merged_by else None,
                 reviewers=[self.user(r) for r in gh_pr.requested_reviewers],
                 assignees=[self.user(a) for a in gh_pr.assignees],
@@ -80,10 +81,10 @@ class GitHubAdapter(Adapter):
                 title=gh_milestone.title,
                 description=gh_milestone.description or "",
                 state=gh_milestone.state,
-                created_at=gh_milestone.created_at,
-                updated_at=gh_milestone.updated_at,
-                closed_at=gh_milestone.closed_at,
-                due_on=gh_milestone.due_on,
+                created_at=to_datetime(gh_milestone.created_at),
+                updated_at=to_datetime(gh_milestone.updated_at),
+                closed_at=to_datetime(gh_milestone.closed_at),
+                due_on=to_datetime(gh_milestone.due_on),
                 issues=[
                     self.issue(x)
                     for x in self.project.get_issues(
@@ -106,8 +107,8 @@ class GitHubAdapter(Adapter):
             id=data.number,
             title=data.title,
             state=data.state,
-            created_at=data.created_at,
-            updated_at=data.updated_at,
-            closed_at=data.closed_at,
+            created_at=to_datetime(data.created_at),
+            updated_at=to_datetime(data.updated_at),
+            closed_at=to_datetime(data.closed_at),
             url=data.html_url,
         )

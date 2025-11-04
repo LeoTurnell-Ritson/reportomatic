@@ -1,9 +1,9 @@
-from datetime import datetime
 
 from gitlab import Gitlab, GitlabGetError
 
 from .base import Adapter
-from .objects import Issue, Pull, User, Milestone
+from .helpers import to_datetime
+from .objects import Issue, Milestone, Pull, User
 from .states import IssueState, MilestoneState, PullState
 
 
@@ -58,12 +58,9 @@ class GitLabAdapter(Adapter):
                 id=gl_mr.iid,
                 title=gl_mr.title,
                 state=gl_mr.state,
-                created_at=gl_mr.created_at,
-                updated_at=gl_mr.updated_at,
-                merged_at=(
-                    datetime.fromisoformat(gl_mr.merged_at)
-                    if gl_mr.merged_at else None
-                ),
+                created_at=to_datetime(gl_mr.created_at),
+                updated_at=to_datetime(gl_mr.updated_at),
+                merged_at=to_datetime(gl_mr.merged_at),
                 url=gl_mr.web_url,
                 merged_by=self.user(gl_mr.merged_by) if gl_mr.merged_by else None,
                 reviewers=(
@@ -90,10 +87,14 @@ class GitLabAdapter(Adapter):
                 title=milestone.title,
                 description=milestone.description,
                 state=milestone.state,
-                created_at=milestone.created_at,
-                updated_at=milestone.updated_at,
-                closed_at=milestone.closed_at if hasattr(milestone, 'closed_at') else None,
-                due_on=milestone.due_date,
+                created_at=to_datetime(milestone.created_at),
+                updated_at=to_datetime(milestone.updated_at),
+                closed_at=(
+                    to_datetime(milestone.closed_at)
+                    if hasattr(milestone, 'closed_at')
+                    else None  # closed_at is not available on GroupMilestones
+                ),
+                due_on=to_datetime(milestone.due_date),
                 issues=[self.issue(i) for i in milestone.issues(list=True, all=True)],
                 url=milestone.web_url,
             )
@@ -110,8 +111,8 @@ class GitLabAdapter(Adapter):
             id=data.iid,
             title=data.title,
             state=data.state,
-            created_at=data.created_at,
-            updated_at=data.updated_at,
-            closed_at=data.closed_at,
+            created_at=to_datetime(data.created_at),
+            updated_at=to_datetime(data.updated_at),
+            closed_at=to_datetime(data.closed_at),
             url=data.web_url,
         )

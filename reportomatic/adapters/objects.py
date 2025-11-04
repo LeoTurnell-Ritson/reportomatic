@@ -82,6 +82,7 @@ class Milestone:
     def __str__(self):
         return (
             f"**{self.state.upper()}** "
-            f"[{self.title.strip()} (due {self.due_on.date() if self.due_on else 'date not set'})]"
+            f"[{self.title.strip()} "
+            f"(due {self.due_on.date() if self.due_on else 'date not set'})]"
             f"({self.url})"
         )
